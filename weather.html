@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>Document</title>
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+			integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+		/>
+		<style>
+			html,
+			body {
+				padding: 0;
+				margin: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app" class="w-100">
+		<div class="container-fluid">
+			<ul class="nav nav-tabs mb-3 justify-content-evenly bg-info-subtle fs-4">
+				<div class="p-2">
+					<h3>台灣各地天氣預報 <i class="bi bi-brightness-alt-high"></i></h3>
+				</div>
+				<li class="nav-item">
+					<button class="nav-link btn btn-outline-secondary" type="button" :class="{ active : isActive === 'all'}" @click="isActive = 'all',changeArea(0)">全部地區</button>
+				</li>
+				<li class="nav-item">
+					<button class="nav-link btn btn-outline-secondary" type="button" :class="{ active : isActive === 'north'}" @click="isActive = 'north',changeArea(1)">北部地區</button>
+				</li>
+				<li class="nav-item">
+					<button class="nav-link btn btn-outline-secondary" type="button" :class="{ active : isActive === 'center'}" @click="isActive = 'center',changeArea(2)">中部地區</button>
+				</li>
+				<li class="nav-item">
+					<button class="nav-link btn btn-outline-secondary" type="button" :class="{ active : isActive === 'south'}" @click="isActive = 'south',changeArea(3)">南部地區</button>
+				</li>
+				<li class="nav-item">
+					<button class="nav-link btn btn-outline-secondary" type="button" :class="{ active : isActive === 'east'}" @click="isActive = 'east',changeArea(4)">東部地區</button>
+				</li>
+				<li class="nav-item">
+					<button class="nav-link btn btn-outline-secondary" type="button" :class="{ active : isActive === 'outside'}" @click="isActive = 'outside',changeArea(5)">離島地區</button>
+				</li>
+			</ul>
+
+
+			<div class="tab-content" id="myTabContent">
+				<div class="tab-pane fade show active d-flex flex-wrap justify-content-evenly gap-5" tabindex="0">
+					<!-- 卡片生成 -->
+					<div v-for="(item, index) in nowCity" :key="index">
+						<div class="card">
+							<img src="./img/wind-2.jpg" class="card-img-top" alt="...">
+							<div class="card-body bg-info-subtle">
+								<h5 class="card-title fs-1 my-4 fw-bolder text-center ">{{item}}</h5>
+								<p class="card-text fs-4 text-center">天氣狀況: {{orgData[item].weather}}</p>
+								<p class="card-text fs-4 text-center">降雨率: {{orgData[item].rain}}%</p>
+								<p class="card-text fs-4 text-center">最低溫度: {{orgData[item].MinT}}度</p>
+								<p class="card-text fs-4 text-center">最高溫度: {{orgData[item].MaxT}}度</p>
+								<p class="card-text fs-4 text-center">舒適度: {{orgData[item].comFort}}度</p>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+			crossorigin="anonymous"
+		></script>
+		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+		<script>
+			const app = Vue.createApp({
+				data() {
+					return {
+						orgData: {},
+						cityAll: [
+							[
+								"臺北市",
+								"新北市",
+								"基隆市",
+								"新竹市",
+								"桃園市",
+								"新竹縣",
+								"宜蘭縣",
+								"高雄市",
+								"臺南市",
+								"嘉義市",
+								"嘉義縣",
+								"屏東縣",
+								"澎湖縣",
+								"花蓮縣",
+								"臺東縣",
+								"臺中市",
+								"苗栗縣",
+								"彰化縣",
+								"南投縣",
+								"雲林縣",
+								"金門縣",
+								"連江縣",
+							],
+							[
+								"臺北市",
+								"新北市",
+								"基隆市",
+								"新竹市",
+								"桃園市",
+								"新竹縣",
+								"宜蘭縣",
+							],
+							["高雄市", "臺南市", "嘉義市", "嘉義縣", "屏東縣", "澎湖縣"],
+							["花蓮縣", "臺東縣"],
+							["臺中市", "苗栗縣", "彰化縣", "南投縣", "雲林縣"],
+							["金門縣", "連江縣"],
+						],
+						isActive: "all",
+						nowCity: [],
+					};
+				},
+
+				methods: {
+					getWeather() {
+						axios(
+							"https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-1A45A1BC-970E-4142-B784-4566D754E357"
+						).then((res) => {
+							getData = res.data;
+							this.processData(getData);
+							this.changeArea(0);
+						});
+					},
+
+					processData(getData) {
+						const locationAll = getData.records.location;
+						locationAll.forEach((location, index) => {
+							let locationName = location.locationName;
+							let weather =
+								location.weatherElement[0].time[0].parameter.parameterName;
+							let rain =
+								location.weatherElement[1].time[0].parameter.parameterName;
+							let MinT =
+								location.weatherElement[2].time[1].parameter.parameterName;
+							let comFort =
+								location.weatherElement[3].time[0].parameter.parameterName;
+							let MaxT =
+								location.weatherElement[4].time[1].parameter.parameterName;
+							this.orgData[locationName] = {
+								locationName: locationName,
+								weather: weather,
+								rain: rain,
+								MinT: MinT,
+								comFort: comFort,
+								MaxT: MaxT,
+							};
+						});
+					},
+
+					changeArea(index) {
+						this.nowCity = this.cityAll[index];
+					},
+				},
+				mounted() {
+					this.getWeather();
+				},
+			});
+
+			app.mount("#app");
+		</script>
+	</body>
+</html>
